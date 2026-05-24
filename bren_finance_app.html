@@ -1,0 +1,458 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BREN — Controle Financeiro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0a0f;
+    --surface:#111118;
+    --surface2:#1a1a24;
+    --border:#2a2a3a;
+    --border2:#3a3a4f;
+    --accent:#5b6af0;
+    --accent2:#7c8af5;
+    --green:#22c55e;
+    --red:#ef4444;
+    --amber:#f59e0b;
+    --text:#f0f0f8;
+    --muted:#8888aa;
+    --muted2:#5555770;
+    --mono:'DM Mono',monospace;
+    --sans:'Sora',sans-serif;
+  }
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+
+  /* LOGIN */
+  #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+  .login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.5rem;width:100%;max-width:400px}
+  .brand{text-align:center;margin-bottom:2rem}
+  .brand-name{font-size:2.2rem;font-weight:600;letter-spacing:-1px;background:linear-gradient(135deg,#5b6af0,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .brand-sub{font-size:.8rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-top:.25rem}
+  .form-group{margin-bottom:1.25rem}
+  .form-group label{display:block;font-size:.78rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem}
+  .form-group input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;color:var(--text);font-family:var(--sans);font-size:.95rem;transition:border-color .2s}
+  .form-group input:focus{outline:none;border-color:var(--accent)}
+  .btn-primary{width:100%;background:var(--accent);border:none;border-radius:10px;padding:.85rem;color:#fff;font-family:var(--sans);font-size:.95rem;font-weight:500;cursor:pointer;transition:opacity .2s,transform .1s}
+  .btn-primary:hover{opacity:.9}
+  .btn-primary:active{transform:scale(.98)}
+  .login-hint{font-size:.78rem;color:var(--muted);text-align:center;margin-top:1rem}
+
+  /* APP */
+  #app{display:none;min-height:100vh}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .topbar-left{display:flex;align-items:center;gap:1rem}
+  .topbar-brand{font-size:1.15rem;font-weight:600;letter-spacing:-.5px;background:linear-gradient(135deg,#5b6af0,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .topbar-year{font-family:var(--mono);font-size:.8rem;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.25rem .6rem}
+  .topbar-right{display:flex;align-items:center;gap:.75rem}
+  .user-pill{font-size:.8rem;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:.3rem .85rem}
+  .btn-logout{background:transparent;border:1px solid var(--border);border-radius:8px;padding:.35rem .8rem;color:var(--muted);font-family:var(--sans);font-size:.8rem;cursor:pointer;transition:all .2s}
+  .btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+  /* SUMMARY BAR */
+  .summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+  .sum-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem}
+  .sum-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem}
+  .sum-value{font-family:var(--mono);font-size:1.35rem;font-weight:500}
+  .sum-value.positive{color:var(--green)}
+  .sum-value.negative{color:var(--red)}
+  .sum-value.accent{color:var(--accent2)}
+  .sum-value.warn{color:var(--amber)}
+
+  /* MONTHS GRID */
+  .months-nav{display:flex;gap:.5rem;padding:1rem 1.5rem;overflow-x:auto;border-bottom:1px solid var(--border)}
+  .month-tab{background:transparent;border:1px solid var(--border);border-radius:8px;padding:.45rem .9rem;color:var(--muted);font-family:var(--sans);font-size:.82rem;cursor:pointer;white-space:nowrap;transition:all .2s}
+  .month-tab:hover{border-color:var(--border2);color:var(--text)}
+  .month-tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .month-tab.has-data{border-color:var(--border2);color:var(--text)}
+
+  /* MONTH VIEW */
+  .month-view{padding:1.5rem;max-width:1100px;margin:0 auto}
+  .month-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+  .month-title{font-size:1.3rem;font-weight:500;letter-spacing:-.5px}
+  .month-config{display:flex;align-items:center;gap:.75rem}
+  .config-group{display:flex;align-items:center;gap:.5rem}
+  .config-label{font-size:.78rem;color:var(--muted)}
+  .config-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.4rem .75rem;color:var(--text);font-family:var(--mono);font-size:.9rem;width:120px;text-align:right}
+  .config-input:focus{outline:none;border-color:var(--accent)}
+
+  /* MONTH STATS */
+  .month-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.25rem}
+  .mstat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem}
+  .mstat-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem}
+  .mstat-value{font-family:var(--mono);font-size:1.1rem;font-weight:500}
+
+  /* TABLE */
+  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .day-table{width:100%;border-collapse:collapse}
+  .day-table thead tr{background:var(--surface2);border-bottom:1px solid var(--border)}
+  .day-table th{padding:.65rem 1rem;text-align:left;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:500}
+  .day-table th:not(:first-child){text-align:right}
+  .day-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+  .day-table tbody tr:last-child{border-bottom:none}
+  .day-table tbody tr:hover{background:var(--surface2)}
+  .day-table td{padding:.6rem 1rem;font-size:.88rem}
+  .day-table td:not(:first-child){text-align:right;font-family:var(--mono)}
+  .day-num{color:var(--muted);font-family:var(--mono);font-size:.8rem;width:36px;display:inline-block}
+  .day-label{font-size:.78rem;color:var(--muted)}
+  td.saldo-pos{color:var(--green)}
+  td.saldo-neg{color:var(--red)}
+  td.saldo-warn{color:var(--amber)}
+  .inline-input{background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:var(--mono);font-size:.88rem;text-align:right;width:90px;transition:border-color .2s;padding:2px 4px}
+  .inline-input:focus{outline:none;border-bottom-color:var(--accent)}
+  .inline-input:hover{border-bottom-color:var(--border2)}
+  .inline-input::placeholder{color:var(--border2)}
+  .entry-badge{display:inline-block;background:#1a2a1a;color:var(--green);font-family:var(--mono);font-size:.82rem;border-radius:4px;padding:1px 6px}
+  .saldo-bar{height:3px;border-radius:2px;margin-top:2px;transition:width .3s}
+
+  /* NO DATA */
+  .empty-state{text-align:center;padding:3rem;color:var(--muted)}
+  .empty-state p{font-size:.9rem;margin-top:.5rem}
+  
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+  @media(max-width:700px){
+    .summary-bar{grid-template-columns:repeat(2,1fr)}
+    .month-stats{grid-template-columns:repeat(2,1fr)}
+    .month-config{flex-direction:column;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-name">BREN</div>
+      <div class="brand-sub">Controle Financeiro</div>
+    </div>
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" id="input-email" placeholder="seu@email.com" value="demo@bren.app">
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="input-pass" placeholder="••••••••" value="123456">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Entrar</button>
+    <p class="login-hint">Demo: demo@bren.app / 123456</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-brand">BREN</div>
+      <div class="topbar-year" id="display-year">2025</div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-pill" id="display-user">demo@bren.app</div>
+      <button class="btn-logout" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="summary-bar" id="summary-bar"></div>
+
+  <div class="months-nav" id="months-nav"></div>
+
+  <div class="month-view" id="month-view"></div>
+</div>
+
+<script>
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DAYS_IN_MONTH = [31,28,31,30,31,30,31,31,30,31,30,31];
+const YEAR = new Date().getFullYear();
+
+// ── STATE ──────────────────────────────────────────────────────────
+let currentUser = null;
+let currentMonth = new Date().getMonth();
+let data = {}; // data[m] = { entrada: num, diario: num, days: [{saida, extra_entrada}] }
+
+function initData() {
+  const saved = localStorage.getItem('bren_data_' + currentUser);
+  if (saved) { data = JSON.parse(saved); return; }
+  data = {};
+  MONTHS.forEach((_,m) => {
+    data[m] = {
+      entrada: 0,
+      diario: 0,
+      days: Array.from({length: DAYS_IN_MONTH[m]}, () => ({saida: 0, extra: 0}))
+    };
+  });
+}
+
+function save() {
+  localStorage.setItem('bren_data_' + currentUser, JSON.stringify(data));
+}
+
+// ── AUTH ───────────────────────────────────────────────────────────
+function doLogin() {
+  const email = document.getElementById('input-email').value.trim();
+  const pass  = document.getElementById('input-pass').value;
+  if (!email || !pass) { alert('Preencha e-mail e senha'); return; }
+  // Demo auth — qualquer combinação entra
+  currentUser = email;
+  document.getElementById('display-user').textContent = email;
+  document.getElementById('display-year').textContent = YEAR;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initData();
+  renderNav();
+  renderSummary();
+  renderMonth(currentMonth);
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ── CALCULATIONS ───────────────────────────────────────────────────
+function calcMonth(m) {
+  const md = data[m];
+  const prevSaldo = m === 0 ? 0 : calcMonth(m-1).saldoFinal;
+  let saldo = prevSaldo + (md.entrada || 0);
+  const rows = [];
+  md.days.forEach((d, i) => {
+    saldo += (d.extra || 0);
+    saldo -= (d.saida || 0);
+    saldo -= (md.diario || 0);
+    rows.push({
+      day: i+1,
+      extra: d.extra || 0,
+      saida: d.saida || 0,
+      diario: md.diario || 0,
+      saldo: saldo
+    });
+  });
+  const totalSaida = md.days.reduce((a,d) => a + (d.saida||0), 0);
+  const totalExtra = md.days.reduce((a,d) => a + (d.extra||0), 0);
+  const totalDiario = (md.diario||0) * md.days.length;
+  return {
+    rows,
+    entrada: (md.entrada||0),
+    totalSaida,
+    totalExtra,
+    totalDiario,
+    saldoFinal: rows[rows.length-1]?.saldo ?? prevSaldo,
+    prevSaldo
+  };
+}
+
+function calcAll() {
+  let totalEntrada=0, totalSaida=0, totalDiario=0;
+  MONTHS.forEach((_,m) => {
+    const r = calcMonth(m);
+    totalEntrada += r.entrada + r.totalExtra;
+    totalSaida += r.totalSaida + r.totalDiario;
+  });
+  const saldoAnual = calcMonth(11).saldoFinal;
+  return {totalEntrada, totalSaida, saldoAnual};
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────
+function fmt(n) {
+  const abs = Math.abs(n);
+  const str = abs.toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2});
+  return (n < 0 ? '-' : '') + 'R$ ' + str;
+}
+function fmtInput(n) { return n ? n.toString() : ''; }
+
+function renderNav() {
+  const nav = document.getElementById('months-nav');
+  nav.innerHTML = MONTHS.map((name,m) => {
+    const md = data[m];
+    const hasData = md && (md.entrada > 0 || md.diario > 0 || md.days.some(d => d.saida > 0 || d.extra > 0));
+    return `<button class="month-tab${m===currentMonth?' active':''}${hasData?' has-data':''}" onclick="switchMonth(${m})">${name}</button>`;
+  }).join('');
+}
+
+function renderSummary() {
+  const {totalEntrada, totalSaida, saldoAnual} = calcAll();
+  const saldoClass = saldoAnual > 0 ? 'positive' : saldoAnual < 0 ? 'negative' : 'accent';
+  document.getElementById('summary-bar').innerHTML = `
+    <div class="sum-card">
+      <div class="sum-label">Entradas no ano</div>
+      <div class="sum-value accent">${fmt(totalEntrada)}</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Saídas no ano</div>
+      <div class="sum-value warn">${fmt(totalSaida)}</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Saldo final</div>
+      <div class="sum-value ${saldoClass}">${fmt(saldoAnual)}</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Saldo do mês atual</div>
+      <div class="sum-value ${calcMonth(currentMonth).saldoFinal >= 0 ? 'positive' : 'negative'}">${fmt(calcMonth(currentMonth).saldoFinal)}</div>
+    </div>
+  `;
+}
+
+function renderMonth(m) {
+  currentMonth = m;
+  const md = data[m];
+  const calc = calcMonth(m);
+  const saldoClass = n => n > 0 ? 'saldo-pos' : n < 0 ? 'saldo-neg' : 'saldo-warn';
+  const maxAbs = Math.max(...calc.rows.map(r => Math.abs(r.saldo)), 1);
+
+  const rows = calc.rows.map(r => {
+    const pct = Math.min(100, Math.round(Math.abs(r.saldo) / maxAbs * 100));
+    const barColor = r.saldo > 0 ? '#22c55e' : '#ef4444';
+    return `<tr>
+      <td>
+        <span class="day-num">${String(r.day).padStart(2,'0')}</span>
+      </td>
+      <td>
+        ${r.extra > 0 ? `<span class="entry-badge">+${fmt(r.extra)}</span>` : '<span style="color:var(--border2)">—</span>'}
+      </td>
+      <td>
+        <input class="inline-input" type="number" min="0" placeholder="0,00"
+          value="${fmtInput(r.saida)}"
+          onchange="setDay(${m},${r.day-1},'saida',this.value)"
+          title="Gasto do dia ${r.day}">
+      </td>
+      <td style="color:var(--muted);font-family:var(--mono)">${fmt(r.diario)}</td>
+      <td class="${saldoClass(r.saldo)}">
+        ${fmt(r.saldo)}
+        <div class="saldo-bar" style="width:${pct}%;background:${barColor};opacity:.35"></div>
+      </td>
+      <td>
+        <input class="inline-input" type="number" min="0" placeholder="entrada extra"
+          value="${fmtInput(r.extra)}"
+          onchange="setDay(${m},${r.day-1},'extra',this.value)"
+          style="width:110px"
+          title="Entrada extra no dia ${r.day}">
+      </td>
+    </tr>`;
+  }).join('');
+
+  const sfClass = saldoClass(calc.saldoFinal);
+  const totalOut = calc.totalSaida + calc.totalDiario;
+
+  document.getElementById('month-view').innerHTML = `
+    <div class="month-header">
+      <div class="month-title">${MONTHS[m]} ${YEAR}</div>
+      <div class="month-config">
+        <div class="config-group">
+          <span class="config-label">Entrada mensal</span>
+          <input class="config-input" type="number" min="0" placeholder="R$ 0,00"
+            value="${fmtInput(md.entrada)}"
+            onchange="setMonthVal(${m},'entrada',this.value)"
+            title="Valor total que entra no mês">
+        </div>
+        <div class="config-group">
+          <span class="config-label">Custo diário fixo</span>
+          <input class="config-input" type="number" min="0" placeholder="R$ 0,00"
+            value="${fmtInput(md.diario)}"
+            onchange="setMonthVal(${m},'diario',this.value)"
+            title="Gasto fixo deduzido todo dia (alimentação, etc)">
+        </div>
+      </div>
+    </div>
+
+    <div class="month-stats">
+      <div class="mstat">
+        <div class="mstat-label">Entrada total</div>
+        <div class="mstat-value" style="color:var(--accent2)">${fmt(calc.entrada + calc.totalExtra)}</div>
+      </div>
+      <div class="mstat">
+        <div class="mstat-label">Gastos avulsos</div>
+        <div class="mstat-value" style="color:var(--red)">${fmt(calc.totalSaida)}</div>
+      </div>
+      <div class="mstat">
+        <div class="mstat-label">Custo fixo total</div>
+        <div class="mstat-value" style="color:var(--amber)">${fmt(calc.totalDiario)}</div>
+      </div>
+      <div class="mstat">
+        <div class="mstat-label">Saldo final</div>
+        <div class="mstat-value ${sfClass}">${fmt(calc.saldoFinal)}</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="day-table">
+        <thead>
+          <tr>
+            <th>Dia</th>
+            <th>Entrada extra</th>
+            <th>Saída avulsa</th>
+            <th>Diário fixo</th>
+            <th>Saldo</th>
+            <th>+ Entrada no dia</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${calc.prevSaldo !== 0 ? `<p style="font-size:.78rem;color:var(--muted);margin-top:.75rem">
+      Saldo transferido do mês anterior: <span style="font-family:var(--mono);color:${calc.prevSaldo>=0?'var(--green)':'var(--red)'}">${fmt(calc.prevSaldo)}</span>
+    </p>` : ''}
+  `;
+}
+
+// ── ACTIONS ────────────────────────────────────────────────────────
+function switchMonth(m) {
+  currentMonth = m;
+  renderNav();
+  renderSummary();
+  renderMonth(m);
+}
+
+function setMonthVal(m, key, val) {
+  data[m][key] = parseFloat(val) || 0;
+  save();
+  renderSummary();
+  renderMonth(m);
+}
+
+function setDay(m, dayIdx, key, val) {
+  data[m].days[dayIdx][key === 'saida' ? 'saida' : 'extra'] = parseFloat(val) || 0;
+  save();
+  renderSummary();
+  // Re-render só saldo col sem rebuild total para não perder foco
+  const calc = calcMonth(m);
+  const rows = document.querySelectorAll('.day-table tbody tr');
+  const maxAbs = Math.max(...calc.rows.map(r => Math.abs(r.saldo)), 1);
+  calc.rows.forEach((r, i) => {
+    if (!rows[i]) return;
+    const cells = rows[i].querySelectorAll('td');
+    const saldoClass = r.saldo > 0 ? 'saldo-pos' : r.saldo < 0 ? 'saldo-neg' : 'saldo-warn';
+    const pct = Math.min(100, Math.round(Math.abs(r.saldo) / maxAbs * 100));
+    const barColor = r.saldo > 0 ? '#22c55e' : '#ef4444';
+    cells[4].className = saldoClass;
+    cells[4].innerHTML = `${fmt(r.saldo)}<div class="saldo-bar" style="width:${pct}%;background:${barColor};opacity:.35"></div>`;
+  });
+  // update month stats
+  const sfClass = r => r > 0 ? 'saldo-pos' : r < 0 ? 'saldo-neg' : 'saldo-warn';
+  const mstats = document.querySelectorAll('.mstat-value');
+  const c = calc;
+  if(mstats[0]) mstats[0].textContent = fmt(c.entrada + c.totalExtra);
+  if(mstats[1]) mstats[1].textContent = fmt(c.totalSaida);
+  if(mstats[2]) mstats[2].textContent = fmt(c.totalDiario);
+  if(mstats[3]){ mstats[3].textContent = fmt(c.saldoFinal); mstats[3].className = 'mstat-value ' + sfClass(c.saldoFinal); }
+}
+
+// auto-login se já havia sessão
+window.onload = () => {
+  const saved = localStorage.getItem('bren_session');
+  if (saved) {
+    document.getElementById('input-email').value = saved;
+    document.getElementById('input-pass').value = '••••••';
+  }
+};
+</script>
+</body>
+</html>
