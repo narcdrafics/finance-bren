@@ -1,0 +1,11 @@
+{
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "BREN Finance",
+        "supportEmail": "suporte@bren.app",
+        "authorizedRedirectUris": ["http://localhost:8080"]
+      }
+    }
+  }
+}
