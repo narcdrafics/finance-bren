@@ -152,6 +152,16 @@
   .inline-input::placeholder{color:var(--border2)}
   .entry-badge{display:inline-block;background:#1a2a1a;color:var(--green);font-family:var(--mono);font-size:.82rem;border-radius:4px;padding:1px 6px}
   .saldo-bar{height:3px;border-radius:2px;margin-top:2px;transition:width .3s}
+  .saida-item{display:flex;align-items:center;gap:4px;margin-bottom:3px}
+  .saida-item .si-nome{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--sans);font-size:.75rem;padding:2px 6px;width:70px}
+  .saida-item .si-nome:focus{outline:none;border-color:var(--accent)}
+  .saida-item .si-valor{background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:.78rem;padding:2px 4px;width:65px;text-align:right}
+  .saida-item .si-valor:focus{outline:none;border-color:var(--accent)}
+  .saida-item .si-nome::placeholder,.saida-item .si-valor::placeholder{color:var(--border2)}
+  .btn-si-rm{background:transparent;border:none;color:var(--red);cursor:pointer;font-size:.8rem;padding:0 2px;line-height:1;opacity:.5;transition:opacity .15s}
+  .btn-si-rm:hover{opacity:1}
+  .btn-si-add{background:transparent;border:1px dashed var(--border2);border-radius:4px;color:var(--muted);cursor:pointer;font-size:.72rem;padding:2px 8px;margin-top:2px;transition:all .15s}
+  .btn-si-add:hover{border-color:var(--accent);color:var(--accent)}
 
   /* NO DATA */
   .empty-state{text-align:center;padding:3rem;color:var(--muted)}
@@ -264,9 +274,17 @@ function initData() {
     data[m] = {
       entrada: 0,
       diario: 0,
-      days: Array.from({length: DAYS_IN_MONTH[m]}, () => ({saida: 0, extra: 0}))
+      days: Array.from({length: DAYS_IN_MONTH[m]}, () => ({saida: [], extra: 0}))
     };
   });
+}
+
+function migrarSaida(d) {
+  if (typeof d.saida === 'number' && d.saida > 0) {
+    d.saida = [{nome: 'Gasto', valor: d.saida}];
+  } else if (!Array.isArray(d.saida)) {
+    d.saida = [];
+  }
 }
 
 function save() {
@@ -301,6 +319,9 @@ auth.onAuthStateChanged(user => {
       const saved = snap.val();
       if (saved) {
         data = saved;
+        MONTHS.forEach((_,m) => {
+          if (data[m]) data[m].days.forEach(d => migrarSaida(d));
+        });
       } else {
         initData();
       }
@@ -348,24 +369,30 @@ async function doLogout() {
 }
 
 // ── CALCULATIONS ───────────────────────────────────────────────────
+function totalSaidasDia(d) {
+  return (d.saida || []).reduce((s, item) => s + (parseFloat(item.valor) || 0), 0);
+}
+
 function calcMonth(m) {
   const md = data[m];
   const prevSaldo = m === 0 ? 0 : calcMonth(m-1).saldoFinal;
   let saldo = prevSaldo + (md.entrada || 0);
   const rows = [];
   md.days.forEach((d, i) => {
+    const saidaTotal = totalSaidasDia(d);
     saldo += (d.extra || 0);
-    saldo -= (d.saida || 0);
+    saldo -= saidaTotal;
     saldo -= (md.diario || 0);
     rows.push({
       day: i+1,
       extra: d.extra || 0,
-      saida: d.saida || 0,
+      saida: saidaTotal,
+      saidaItens: d.saida || [],
       diario: md.diario || 0,
       saldo: saldo
     });
   });
-  const totalSaida = md.days.reduce((a,d) => a + (d.saida||0), 0);
+  const totalSaida = md.days.reduce((a,d) => a + totalSaidasDia(d), 0);
   const totalExtra = md.days.reduce((a,d) => a + (d.extra||0), 0);
   const totalDiario = (md.diario||0) * md.days.length;
   return {
@@ -402,7 +429,7 @@ function renderNav() {
   const nav = document.getElementById('months-nav');
   nav.innerHTML = MONTHS.map((name,m) => {
     const md = data[m];
-    const hasData = md && (md.entrada > 0 || md.diario > 0 || md.days.some(d => d.saida > 0 || d.extra > 0));
+    const hasData = md && (md.entrada > 0 || md.diario > 0 || md.days.some(d => totalSaidasDia(d) > 0 || d.extra > 0));
     return `<button class="month-tab${m===currentMonth?' active':''}${hasData?' has-data':''}" onclick="switchMonth(${m})">${name}</button>`;
   }).join('');
 }
@@ -440,6 +467,16 @@ function renderMonth(m) {
   const rows = calc.rows.map(r => {
     const pct = Math.min(100, Math.round(Math.abs(r.saldo) / maxAbs * 100));
     const barColor = r.saldo > 0 ? '#22c55e' : '#ef4444';
+    const saidaItens = (r.saidaItens || []).map((item, idx) => {
+      const v = parseFloat(item.valor) || 0;
+      return `<div class="saida-item">
+        <input class="si-nome" type="text" placeholder="descrição" value="${item.nome || ''}"
+          onchange="updateSaidaItem(${m},${r.day-1},${idx},'nome',this.value)">
+        <input class="si-valor" type="number" min="0" step="0.01" placeholder="0,00" value="${v ? v.toString() : ''}"
+          onchange="updateSaidaItem(${m},${r.day-1},${idx},'valor',this.value)">
+        <button class="btn-si-rm" onclick="removeSaidaItem(${m},${r.day-1},${idx})" title="Remover">✕</button>
+      </div>`;
+    }).join('');
     return `<tr>
       <td>
         <span class="day-num">${String(r.day).padStart(2,'0')}</span>
@@ -447,11 +484,9 @@ function renderMonth(m) {
       <td>
         ${r.extra > 0 ? `<span class="entry-badge">+${fmt(r.extra)}</span>` : '<span style="color:var(--border2)">—</span>'}
       </td>
-      <td>
-        <input class="inline-input" type="number" min="0" placeholder="0,00"
-          value="${fmtInput(r.saida)}"
-          onchange="setDay(${m},${r.day-1},'saida',this.value)"
-          title="Gasto do dia ${r.day}">
+      <td style="vertical-align:top">
+        ${saidaItens}
+        <button class="btn-si-add" onclick="addSaidaItem(${m},${r.day-1})">+ add saída</button>
       </td>
       <td style="color:var(--muted);font-family:var(--mono)">${fmt(r.diario)}</td>
       <td class="${saldoClass(r.saldo)}">
@@ -546,9 +581,34 @@ function setMonthVal(m, key, val) {
 }
 
 function setDay(m, dayIdx, key, val) {
-  data[m].days[dayIdx][key === 'saida' ? 'saida' : 'extra'] = parseFloat(val) || 0;
+  data[m].days[dayIdx][key] = parseFloat(val) || 0;
   save();
+  refreshSaldoUI(m);
+}
+
+function addSaidaItem(m, dayIdx) {
+  data[m].days[dayIdx].saida.push({nome: '', valor: 0});
+  save();
+  renderMonth(m);
   renderSummary();
+  renderNav();
+}
+
+function removeSaidaItem(m, dayIdx, itemIdx) {
+  data[m].days[dayIdx].saida.splice(itemIdx, 1);
+  save();
+  renderMonth(m);
+  renderSummary();
+  renderNav();
+}
+
+function updateSaidaItem(m, dayIdx, itemIdx, campo, val) {
+  data[m].days[dayIdx].saida[itemIdx][campo] = campo === 'valor' ? (parseFloat(val) || 0) : val;
+  save();
+  refreshSaldoUI(m);
+}
+
+function refreshSaldoUI(m) {
   const calc = calcMonth(m);
   const rows = document.querySelectorAll('.day-table tbody tr');
   const maxAbs = Math.max(...calc.rows.map(r => Math.abs(r.saldo)), 1);
