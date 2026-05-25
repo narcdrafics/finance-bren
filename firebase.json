@@ -4,8 +4,24 @@
       "googleSignIn": {
         "oAuthBrandDisplayName": "BREN Finance",
         "supportEmail": "suporte@bren.app",
-        "authorizedRedirectUris": ["http://localhost:8080"]
+        "authorizedRedirectUris": ["http://localhost"]
       }
     }
+  },
+  "hosting": {
+    "site": "fin-bren",
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/bren_finance_app.html"
+      }
+    ]
   }
 }

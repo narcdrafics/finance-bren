@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -22,35 +21,80 @@
     --amber:#f59e0b;
     --text:#f0f0f8;
     --muted:#8888aa;
-    --muted2:#5555770;
     --mono:'DM Mono',monospace;
     --sans:'Sora',sans-serif;
   }
   body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
 
-  /* LOGIN */
-  #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
-  .login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.5rem;width:100%;max-width:400px}
-  .brand{text-align:center;margin-bottom:2rem}
-  .brand-name{font-size:2.2rem;font-weight:600;letter-spacing:-1px;background:linear-gradient(135deg,#5b6af0,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .brand-sub{font-size:.8rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-top:.25rem}
-  .form-group{margin-bottom:1.25rem}
-  .form-group label{display:block;font-size:.78rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem}
-  .form-group input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;color:var(--text);font-family:var(--sans);font-size:.95rem;transition:border-color .2s}
-  .form-group input:focus{outline:none;border-color:var(--accent)}
-  .btn-primary{width:100%;background:var(--accent);border:none;border-radius:10px;padding:.85rem;color:#fff;font-family:var(--sans);font-size:.95rem;font-weight:500;cursor:pointer;transition:opacity .2s,transform .1s}
-  .btn-primary:hover{opacity:.9}
-  .btn-primary:active{transform:scale(.98)}
-  .login-hint{font-size:.78rem;color:var(--muted);text-align:center;margin-top:1rem}
+  /* ── LOADING ── */
+  #loading-screen{
+    display:flex;align-items:center;justify-content:center;
+    min-height:100vh;flex-direction:column;gap:1rem
+  }
+  .spinner{
+    width:36px;height:36px;border:3px solid var(--border2);
+    border-top-color:var(--accent);border-radius:50%;
+    animation:spin .8s linear infinite
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{font-size:.82rem;color:var(--muted)}
 
-  /* APP */
+  /* ── LOGIN ── */
+  #login-screen{display:none;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+  .login-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:24px;padding:3rem 2.5rem;width:100%;max-width:420px;
+    box-shadow:0 0 80px rgba(91,106,240,.08);
+    animation:fadeUp .4s ease both
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .brand{text-align:center;margin-bottom:2.5rem}
+  .brand-logo{
+    width:64px;height:64px;border-radius:18px;
+    background:linear-gradient(135deg,#5b6af0,#a78bfa);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 1rem;font-size:1.6rem;font-weight:700;color:#fff;
+    box-shadow:0 8px 32px rgba(91,106,240,.35)
+  }
+  .brand-name{font-size:2rem;font-weight:600;letter-spacing:-1px;background:linear-gradient(135deg,#5b6af0,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .brand-sub{font-size:.8rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-top:.3rem}
+  .login-divider{
+    display:flex;align-items:center;gap:.75rem;margin:2rem 0;
+    color:var(--muted);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase
+  }
+  .login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+  /* Google button */
+  .btn-google{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:.75rem;
+    background:#fff;border:none;border-radius:12px;padding:.9rem 1.25rem;
+    color:#1f1f1f;font-family:var(--sans);font-size:.95rem;font-weight:500;
+    cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,.15)
+  }
+  .btn-google:hover{background:#f8f8f8;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(-1px)}
+  .btn-google:active{transform:scale(.98)}
+  .btn-google svg{flex-shrink:0}
+  .btn-google.loading{opacity:.7;pointer-events:none}
+  .login-footer{font-size:.75rem;color:var(--muted);text-align:center;margin-top:1.5rem;line-height:1.6}
+
+  /* ── APP ── */
   #app{display:none;min-height:100vh}
   .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
   .topbar-left{display:flex;align-items:center;gap:1rem}
   .topbar-brand{font-size:1.15rem;font-weight:600;letter-spacing:-.5px;background:linear-gradient(135deg,#5b6af0,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
   .topbar-year{font-family:var(--mono);font-size:.8rem;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.25rem .6rem}
   .topbar-right{display:flex;align-items:center;gap:.75rem}
-  .user-pill{font-size:.8rem;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:.3rem .85rem}
+  .user-avatar{
+    width:30px;height:30px;border-radius:50%;border:2px solid var(--border2);
+    object-fit:cover;display:block
+  }
+  .user-avatar-placeholder{
+    width:30px;height:30px;border-radius:50%;background:var(--accent);
+    border:2px solid var(--border2);display:flex;align-items:center;
+    justify-content:center;font-size:.75rem;font-weight:600;color:#fff
+  }
+  .user-pill{font-size:.8rem;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:.3rem .85rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .btn-logout{background:transparent;border:1px solid var(--border);border-radius:8px;padding:.35rem .8rem;color:var(--muted);font-family:var(--sans);font-size:.8rem;cursor:pointer;transition:all .2s}
   .btn-logout:hover{border-color:var(--red);color:var(--red)}
 
@@ -99,7 +143,6 @@
   .day-table td{padding:.6rem 1rem;font-size:.88rem}
   .day-table td:not(:first-child){text-align:right;font-family:var(--mono)}
   .day-num{color:var(--muted);font-family:var(--mono);font-size:.8rem;width:36px;display:inline-block}
-  .day-label{font-size:.78rem;color:var(--muted)}
   td.saldo-pos{color:var(--green)}
   td.saldo-neg{color:var(--red)}
   td.saldo-warn{color:var(--amber)}
@@ -128,23 +171,38 @@
 </head>
 <body>
 
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-text">Carregando…</div>
+</div>
+
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="brand">
+      <div class="brand-logo">B</div>
       <div class="brand-name">BREN</div>
       <div class="brand-sub">Controle Financeiro</div>
     </div>
-    <div class="form-group">
-      <label>E-mail</label>
-      <input type="email" id="input-email" placeholder="seu@email.com" value="demo@bren.app">
-    </div>
-    <div class="form-group">
-      <label>Senha</label>
-      <input type="password" id="input-pass" placeholder="••••••••" value="123456">
-    </div>
-    <button class="btn-primary" onclick="doLogin()">Entrar</button>
-    <p class="login-hint">Demo: demo@bren.app / 123456</p>
+
+    <div class="login-divider">Entre com sua conta</div>
+
+    <button class="btn-google" id="btn-google-login" onclick="doGoogleLogin()">
+      <svg width="20" height="20" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+      Entrar com Google
+    </button>
+
+    <p class="login-footer">
+      Seus dados ficam salvos localmente neste dispositivo.<br>
+      A conta Google é usada apenas para identificação.
+    </p>
   </div>
 </div>
 
@@ -156,19 +214,41 @@
       <div class="topbar-year" id="display-year">2025</div>
     </div>
     <div class="topbar-right">
-      <div class="user-pill" id="display-user">demo@bren.app</div>
+      <div id="user-avatar-wrap"></div>
+      <div class="user-pill" id="display-user"></div>
       <button class="btn-logout" onclick="doLogout()">Sair</button>
     </div>
   </div>
 
   <div class="summary-bar" id="summary-bar"></div>
-
   <div class="months-nav" id="months-nav"></div>
-
   <div class="month-view" id="month-view"></div>
 </div>
 
+<!-- Firebase SDK via CDN (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
 <script>
+// ── FIREBASE CONFIG ────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyD9i1vMwmJwiUfwUKetxrzIO6Bm5K-5oro",
+  authDomain: "controle-obras-c889d.firebaseapp.com",
+  databaseURL: "https://controle-obras-c889d-default-rtdb.firebaseio.com",
+  projectId: "controle-obras-c889d",
+  storageBucket: "controle-obras-c889d.firebasestorage.app",
+  messagingSenderId: "570296468947",
+  appId: "1:570296468947:web:5cab545ccbdb914d5d1b26",
+  measurementId: "G-BLXF9WZG9N"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+const db = firebase.database();
+
+// ── CONSTANTS ──────────────────────────────────────────────────────
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const DAYS_IN_MONTH = [31,28,31,30,31,30,31,31,30,31,30,31];
 const YEAR = new Date().getFullYear();
@@ -176,11 +256,9 @@ const YEAR = new Date().getFullYear();
 // ── STATE ──────────────────────────────────────────────────────────
 let currentUser = null;
 let currentMonth = new Date().getMonth();
-let data = {}; // data[m] = { entrada: num, diario: num, days: [{saida, extra_entrada}] }
+let data = {};
 
 function initData() {
-  const saved = localStorage.getItem('bren_data_' + currentUser);
-  if (saved) { data = JSON.parse(saved); return; }
   data = {};
   MONTHS.forEach((_,m) => {
     data[m] = {
@@ -192,30 +270,81 @@ function initData() {
 }
 
 function save() {
-  localStorage.setItem('bren_data_' + currentUser, JSON.stringify(data));
+  db.ref('users/' + currentUser.uid + '/data').set(data);
 }
 
-// ── AUTH ───────────────────────────────────────────────────────────
-function doLogin() {
-  const email = document.getElementById('input-email').value.trim();
-  const pass  = document.getElementById('input-pass').value;
-  if (!email || !pass) { alert('Preencha e-mail e senha'); return; }
-  // Demo auth — qualquer combinação entra
-  currentUser = email;
-  document.getElementById('display-user').textContent = email;
-  document.getElementById('display-year').textContent = YEAR;
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  initData();
-  renderNav();
-  renderSummary();
-  renderMonth(currentMonth);
+// ── AUTH STATE OBSERVER ────────────────────────────────────────────
+auth.onAuthStateChanged(user => {
+  const loading  = document.getElementById('loading-screen');
+  const loginScr = document.getElementById('login-screen');
+  const appScr   = document.getElementById('app');
+
+  if (user) {
+    currentUser = user;
+    loading.style.display  = 'none';
+    loginScr.style.display = 'none';
+    appScr.style.display   = 'block';
+
+    // Avatar
+    const wrap = document.getElementById('user-avatar-wrap');
+    if (user.photoURL) {
+      wrap.innerHTML = `<img class="user-avatar" src="${user.photoURL}" alt="${user.displayName || 'Usuário'}" referrerpolicy="no-referrer">`;
+    } else {
+      const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+      wrap.innerHTML = `<div class="user-avatar-placeholder">${initial}</div>`;
+    }
+
+    document.getElementById('display-user').textContent = user.displayName || user.email;
+    document.getElementById('display-year').textContent = YEAR;
+
+    db.ref('users/' + user.uid + '/data').once('value').then(snap => {
+      const saved = snap.val();
+      if (saved) {
+        data = saved;
+      } else {
+        initData();
+      }
+      renderNav();
+      renderSummary();
+      renderMonth(currentMonth);
+    });
+  } else {
+    currentUser = null;
+    loading.style.display  = 'none';
+    loginScr.style.display = 'flex';
+    appScr.style.display   = 'none';
+  }
+});
+
+// ── AUTH ACTIONS ───────────────────────────────────────────────────
+async function doGoogleLogin() {
+  const btn = document.getElementById('btn-google-login');
+  btn.classList.add('loading');
+  btn.textContent = 'Aguardando…';
+  try {
+    await auth.signInWithPopup(googleProvider);
+    // onAuthStateChanged cuida do resto
+  } catch (err) {
+    console.error('Erro no login:', err);
+    btn.classList.remove('loading');
+    btn.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+      Entrar com Google`;
+    if (err.code !== 'auth/popup-closed-by-user') {
+      alert('Erro ao entrar: ' + (err.message || 'Tente novamente.'));
+    }
+  }
 }
 
-function doLogout() {
-  currentUser = null;
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
+async function doLogout() {
+  await auth.signOut();
+  // onAuthStateChanged exibe login screen
 }
 
 // ── CALCULATIONS ───────────────────────────────────────────────────
@@ -251,7 +380,7 @@ function calcMonth(m) {
 }
 
 function calcAll() {
-  let totalEntrada=0, totalSaida=0, totalDiario=0;
+  let totalEntrada=0, totalSaida=0;
   MONTHS.forEach((_,m) => {
     const r = calcMonth(m);
     totalEntrada += r.entrada + r.totalExtra;
@@ -340,8 +469,6 @@ function renderMonth(m) {
   }).join('');
 
   const sfClass = saldoClass(calc.saldoFinal);
-  const totalOut = calc.totalSaida + calc.totalDiario;
-
   document.getElementById('month-view').innerHTML = `
     <div class="month-header">
       <div class="month-title">${MONTHS[m]} ${YEAR}</div>
@@ -422,7 +549,6 @@ function setDay(m, dayIdx, key, val) {
   data[m].days[dayIdx][key === 'saida' ? 'saida' : 'extra'] = parseFloat(val) || 0;
   save();
   renderSummary();
-  // Re-render só saldo col sem rebuild total para não perder foco
   const calc = calcMonth(m);
   const rows = document.querySelectorAll('.day-table tbody tr');
   const maxAbs = Math.max(...calc.rows.map(r => Math.abs(r.saldo)), 1);
@@ -435,7 +561,6 @@ function setDay(m, dayIdx, key, val) {
     cells[4].className = saldoClass;
     cells[4].innerHTML = `${fmt(r.saldo)}<div class="saldo-bar" style="width:${pct}%;background:${barColor};opacity:.35"></div>`;
   });
-  // update month stats
   const sfClass = r => r > 0 ? 'saldo-pos' : r < 0 ? 'saldo-neg' : 'saldo-warn';
   const mstats = document.querySelectorAll('.mstat-value');
   const c = calc;
@@ -444,15 +569,6 @@ function setDay(m, dayIdx, key, val) {
   if(mstats[2]) mstats[2].textContent = fmt(c.totalDiario);
   if(mstats[3]){ mstats[3].textContent = fmt(c.saldoFinal); mstats[3].className = 'mstat-value ' + sfClass(c.saldoFinal); }
 }
-
-// auto-login se já havia sessão
-window.onload = () => {
-  const saved = localStorage.getItem('bren_session');
-  if (saved) {
-    document.getElementById('input-email').value = saved;
-    document.getElementById('input-pass').value = '••••••';
-  }
-};
 </script>
 </body>
 </html>
