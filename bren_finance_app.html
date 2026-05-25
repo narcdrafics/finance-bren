@@ -288,6 +288,7 @@ function migrarSaida(d) {
 }
 
 function save() {
+  if (!currentUser) return;
   db.ref('users/' + currentUser.uid + '/data').set(data);
 }
 
@@ -320,7 +321,12 @@ auth.onAuthStateChanged(user => {
       if (saved) {
         data = saved;
         MONTHS.forEach((_,m) => {
-          if (data[m]) data[m].days.forEach(d => migrarSaida(d));
+          if (data[m]) {
+            if (!data[m].days) {
+              data[m].days = Array.from({length: DAYS_IN_MONTH[m]}, () => ({saida: [], extra: 0}));
+            }
+            data[m].days.forEach(d => migrarSaida(d));
+          }
         });
       } else {
         initData();
@@ -331,6 +337,7 @@ auth.onAuthStateChanged(user => {
     });
   } else {
     currentUser = null;
+    data = {};
     loading.style.display  = 'none';
     loginScr.style.display = 'flex';
     appScr.style.display   = 'none';
