@@ -289,7 +289,7 @@ function migrarSaida(d) {
 
 function save() {
   if (!currentUser) return;
-  db.ref('users/' + currentUser.uid + '/data').set(data);
+  db.ref('profiles/' + currentUser.uid + '/bren_data').set(data);
 }
 
 // ── AUTH STATE OBSERVER ────────────────────────────────────────────
@@ -316,7 +316,7 @@ auth.onAuthStateChanged(user => {
     document.getElementById('display-user').textContent = user.displayName || user.email;
     document.getElementById('display-year').textContent = YEAR;
 
-    db.ref('users/' + user.uid + '/data').once('value').then(snap => {
+    db.ref('profiles/' + user.uid + '/bren_data').once('value').then(snap => {
       const saved = snap.val();
       if (saved) {
         data = saved;
